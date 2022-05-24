@@ -1,7 +1,12 @@
 name: Nyctophobia
-version: '${project.version}'
+version: 1.1
 main: dev.timecoding.nyctophobia.Nyctophobia
 api-version: 1.18
 authors: [ TimeCoding ]
 description: Let the players feel fear!
 website: timecoding.de
+
+commands:
+  nyc:
+    aliases: nyctophobia
+    description: The MainCommand for the Plugin Nyctophobia!

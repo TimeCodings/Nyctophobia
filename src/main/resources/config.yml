@@ -1,0 +1,101 @@
+###############################################################################################
+#    ███╗░░██╗██╗░░░██╗░█████╗░████████╗░█████╗░██████╗░██╗░░██╗░█████╗░██████╗░██╗░█████╗░   #
+#    ████╗░██║╚██╗░██╔╝██╔══██╗╚══██╔══╝██╔══██╗██╔══██╗██║░░██║██╔══██╗██╔══██╗██║██╔══██╗   #
+#    ██╔██╗██║░╚████╔╝░██║░░╚═╝░░░██║░░░██║░░██║██████╔╝███████║██║░░██║██████╦╝██║███████║   #
+#    ██║╚████║░░╚██╔╝░░██║░░██╗░░░██║░░░██║░░██║██╔═══╝░██╔══██║██║░░██║██╔══██╗██║██╔══██║   #
+#    ██║░╚███║░░░██║░░░╚█████╔╝░░░██║░░░╚█████╔╝██║░░░░░██║░░██║╚█████╔╝██████╦╝██║██║░░██║   #
+#    ╚═╝░░╚══╝░░░╚═╝░░░░╚════╝░░░░╚═╝░░░░╚════╝░╚═╝░░░░░╚═╝░░╚═╝░╚════╝░╚═════╝░╚═╝╚═╝░░╚═╝   #
+###############################################################################################
+
+#Change to false if you want to disable the plugin
+Enabled: true
+
+#Change to false if you want to disable bStats (What's bStats? https://bstats.org/)
+bStats: true
+
+#Put a number from 0-15 in the field to set the intensity of the light (if this light level is reached the event will be triggered) (0 = lowest, 15 = highest)
+MaxLighting: 0
+
+#Same as MaxLighting, but it's the value how strong e.g. a torch may shine (again, only the values 0-15 may be used)
+MaxBlockLighting: 1
+
+#Set to true if you want the action to only happen at night
+MustBeNightInWorld: false
+
+#Activate the function if you want the action to only happen when there are a certain number of monsters nearby!
+MonsterRequirement:
+  #Enable the feature
+  Enabled: false
+  #Set the minimum of monsters which need to be spawned in a certain radius
+  MinMonsters: 2
+  #Set the radius of blocks in which a certain number of monsters must be spawned
+  RadiusInBlocks: 10
+
+#Set the actions to take place when you fall into the darkness (There's also the DarknessEnterEvent for this if you're using the API)
+Events:
+  #Activate this if you want to send a random title from the titles below
+  RandomTitle: false
+  #Activate this if you want to send a random message to the player from the messages below
+  RandomMessage: false
+  #Activate this if you want to apply a random potions from the potions below
+  RandomPotion: false
+  #Activate this if you want to play a random sound from the sounds below
+  RandomSound: false
+  #Activate this if you want to send a random command from the commands below
+  RandomCommand: false
+
+  #Set the titles, which you want to get displayed
+  #Add " - " (with the subtitle behind it) if you want to add a subtitle!
+  Titles:
+    - '&8&lIt is so dark! - &0Dark...'
+
+  #Set the messages, which you want to get sended
+  Messages:
+    - '&8Why it is so dark here? &0Help me!'
+    - '&eGet a torch to light up!'
+
+  #Set the potions, which you want to get applied
+  #Add " - AMOUNTOFAMPLIFIER" at the end of the potions to set the amount of amplifier (Default: 99999999/Unlimited)
+  #All Minecraft-PotionEffectTypes can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/potion/PotionEffectType.html
+  Potions:
+    - BLINDNESS - 5
+    - WEAKNESS
+
+  #Set the sounds, which you want to get played
+  #All Minecraft-Sounds can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+  Sounds:
+    - BLOCK_ANVIL_BREAK
+
+  #Set the Commands, which you want to get sended
+  #Add " - console" at the end if you want to send this command in the console!
+  #There are also some placeholders: %player% = The playername, %uuid% = The UUID of the player
+  Commands:
+    - give %player% black_wool 1 - console
+
+#Set a cooldown if the action should only happen every few seconds!
+Cooldown:
+  Enabled: false
+  InSeconds: 5
+
+#WorldBlacklist (if you add a world to this list (if you enabled this feature), this plugin won't work in this worlds)
+Blacklist:
+  #Set this to true if you want to enable this feature
+  Enabled: true
+  #Set this to true if you want to have a whitelist instead of a BlackList
+  TurnIntoWhitelist: false
+  #Add all blacklisted or whitelisted worlds to this list
+  Worlds:
+    - world_nether
+    - world_the_end
+
+#Change the Permission of some Commands
+Permission:
+  #Command: /nyc help (If you don't have this permission, you also get a no permission message if you typed the wrong syntax)
+  HelpCommand: nyctophobia.help
+  #Command: /nyc reload
+  ReloadCommand: nyctophobia.reload
+
+#DONT CHANGE THIS!!!
+#If you change this, the config will reset itself
+config-version: 1.1
+

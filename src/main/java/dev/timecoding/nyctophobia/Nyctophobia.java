@@ -1,33 +1,43 @@
 package dev.timecoding.nyctophobia;
 
-import dev.timecoding.nyctophobia.bstats.Metrics;
+import dev.timecoding.nyctophobia.api.Metrics;
+import dev.timecoding.nyctophobia.command.NycCommand;
+import dev.timecoding.nyctophobia.command.NycTabComplete;
 import dev.timecoding.nyctophobia.file.ConfigManager;
 import dev.timecoding.nyctophobia.listener.MoveListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
 
-public final class Nyctophobia extends JavaPlugin {
+public final class Nyctophobia extends JavaPlugin implements Listener {
 
     public static Nyctophobia plugin;
     public static ConfigManager config;
     private ArrayList<Player> cooldown = new ArrayList<>();
+    public boolean updateavailable = false;
 
     @Override
     public void onEnable() {
         //Init
-        Bukkit.getConsoleSender().sendMessage("§aNyctophobia §bby TimeCode §e(Created in short amount of time) §cv"+getDescription().getVersion());
+        Bukkit.getConsoleSender().sendMessage("§eNyctophobia §aup and running §cv"+getDescription().getVersion());
         //Register Instance
         plugin = this;
         config = new ConfigManager(plugin, "config");
-        //Add Defaults (Config)
-        addDefaults();
-        //Register Listener
+        //Init Config
+        config.init();
+        //Register Listeners
         getServer().getPluginManager().registerEvents(new MoveListener(), this);
+        getServer().getPluginManager().registerEvents(this, this);
+        //Register Commands and TabCompleter
+        getCommand("nyc").setExecutor(new NycCommand());
+        getCommand("nyc").setTabCompleter(new NycTabComplete());
         //bStats
         if(config.getBoolean("bStats")){
             int pluginId = 15276;
@@ -35,35 +45,13 @@ public final class Nyctophobia extends JavaPlugin {
         }
     }
 
-    public void addDefaults(){
-        //Init
-        config.init();
-        //Enabled
-        config.addDefaultBoolean("Enabled", true);
-        config.addDefaultBoolean("bStats", true);
-        //Lighting
-        config.addDefaultInt("MaxLighting", 0);
-        config.addDefaultInt("MaxBlockLighting", 1);
-        //NightValue
-        config.addDefaultBoolean("MustBeNightInWorld", false);
-        //MonsterRequirement
-        config.addDefaultBoolean("MonsterRequirement.Enabled", true);
-        config.addDefaultInt("MonsterRequirement.MinMonsters", 2);
-        config.addDefaultInt("MonsterRequirement.RadiusInBlocks", 10);
-        //Events
-        config.addDefaultBoolean("Events.RandomTitle", false);
-        config.addDefaultBoolean("Events.RandomMessage", false);
-        config.addDefaultBoolean("Events.RandomPotion", false);
-        config.addDefaultBoolean("Events.RandomSound", false);
-        config.addDefaultBoolean("Events.RandomCommand", false);
-        config.addDefaultList("Events.Titles", "&8&lIt is so dark! - &0Dark...");
-        config.addDefaultList("Events.Messages", "&8Why it's so dark here? &0Help me! &eGet a torch to light up!");
-        config.addDefaultList("Events.Potions", "BLINDNESS");
-        config.addDefaultList("Events.Sounds", "BLOCK_ANVIL_BREAK");
-        config.addDefaultList("Events.Commands", "give %player% apple 1 - console");
-        //Cooldown
-        config.addDefaultBoolean("Cooldown.Enabled", true);
-        config.addDefaultInt("Cooldown.InSeconds", 5);
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e){
+        Player p = e.getPlayer();
+        if(p.isOp()){
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2, 2);
+            p.sendMessage("§fNyctophobia | §cA new update is available! To guarantee the best gaming experience, please download the new update from this link: §ehttps://www.spigotmc.org/resources/nyctophobia.102177/");
+        }
     }
 
     public boolean cooldownEnabled(Player p){

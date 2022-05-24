@@ -41,8 +41,20 @@ public class MoveListener implements Listener {
         int maxlighting = config.getInt("MaxLighting");
         int maxblocklighting = config.getInt("MaxBlockLighting");
         boolean night = config.getBoolean("MustBeNightInWorld");
+        boolean blacklistenabled = config.getBoolean("Blacklist.Enabled");
+        boolean intowhitelist = config.getBoolean("Blacklist.TurnIntoWhitelist");
+
+        List<String> blacklist = config.getList("Blacklist.Worlds");
+
+        if(maxlighting >= 16){
+            maxlighting = 0;
+        }
+        if(maxblocklighting >= 16){
+            maxblocklighting = 0;
+        }
 
         if(enabled) {
+            if(!blacklistenabled || blacklistenabled && !intowhitelist && !blacklist.contains(player.getWorld().getName()) || blacklistenabled && intowhitelist && blacklist.contains(player.getWorld().getName()))
             if(night && !plugin.isDay(player) || !night){
                 //Get Lightlevels
                 String lightlevel = String.valueOf(b.getLightLevel());
@@ -104,12 +116,16 @@ public class MoveListener implements Listener {
                                     player.sendTitle(s, "");
                                 }
                             } else {
+                                boolean block = false;
                                 for (String st : list) {
-                                    if (st.contains(" - ")) {
-                                        ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
-                                        player.sendTitle(split.get(0), split.get(1));
-                                    } else {
-                                        player.sendTitle(st, "");
+                                    if(!block) {
+                                        if (st.contains(" - ")) {
+                                            ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
+                                            player.sendTitle(split.get(0), split.get(1));
+                                        } else {
+                                            player.sendTitle(st, "");
+                                        }
+                                        block = true;
                                     }
                                 }
                             }
@@ -129,10 +145,36 @@ public class MoveListener implements Listener {
                                 int size = list.size();
                                 int random = r.nextInt(size);
                                 s = list.get(random);
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), 999999999, 999999999));
+                                if(s.contains(" - ") && !s.startsWith(" - ")){
+                                    ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
+                                    int i;
+                                    try {
+                                        i = Integer.parseInt(split.get(1));
+                                    } catch (NumberFormatException en) {
+                                        i = 999999999;
+                                    }
+                                    if(i <= 999999999) {
+                                        player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                    }
+                                }else{
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), 999999999, 999999999));
+                                }
                             } else {
                                 for (String st : list) {
-                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), 999999999, 999999999));
+                                    if(st.contains(" - ") && !st.startsWith(" - ")){
+                                        ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
+                                        int i;
+                                        try {
+                                            i = Integer.parseInt(split.get(1));
+                                        } catch (NumberFormatException en) {
+                                            i = 999999999;
+                                        }
+                                        if(i <= 999999999) {
+                                            player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                        }
+                                    }else{
+                                        player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), 999999999, 999999999));
+                                    };
                                 }
                             }
                             list = soundl;
@@ -170,15 +212,23 @@ public class MoveListener implements Listener {
                         }
                     }
                 }else if(playerindarkness.contains(player)){
-                    //Remove from List
-                    playerindarkness.remove(player);
-                    //Remove all effects
-                    List<String> potl = config.getList("Events.Potions");
-                    for(String s : potl) {
-                        player.removePotionEffect(PotionEffectType.getByName(s));
-                    }
                     //Trigger Event
-                    Bukkit.getPluginManager().callEvent(new DarknessLeaveEvent(player));
+                    DarknessLeaveEvent leave = new DarknessLeaveEvent(player);
+                    Bukkit.getPluginManager().callEvent(leave);
+                    if(!leave.isCancelled()) {
+                        //Remove from List
+                        playerindarkness.remove(player);
+                        //Remove all effects
+                        List<String> potl = config.getList("Events.Potions");
+                        for (String s : potl) {
+                            if(s.contains(" - ") && !s.startsWith(" - ")){
+                                ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
+                                player.removePotionEffect(PotionEffectType.getByName(split.get(0)));
+                            }else{
+                                player.removePotionEffect(PotionEffectType.getByName(s));
+                            }
+                        }
+                    }
                 }
             }
         }
