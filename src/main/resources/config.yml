@@ -40,6 +40,7 @@ MonsterRequirement:
   RadiusInBlocks: 10
 
 #Set the actions to take place when you fall into the darkness (There's also the DarknessEnterEvent for this if you're using the API)
+#IMPORTANT: This actions will be triggered if a player has entered the darkness
 Events:
   #Activate this if you want to send a random title from the titles below
   RandomTitle: false
@@ -74,11 +75,38 @@ Events:
   Sounds:
     - BLOCK_ANVIL_BREAK
 
+  #You can also play custom noteblock music (ONLY IF YOU HAVE INSTALLED NOTEBLOCKAPI: https://www.spigotmc.org/resources/noteblockapi.19287/)
+  #To play custom music just follow the tutorial "How to get .nbs" on this spigot site and put the plugin
+  #into the plugins folder of THIS Minecraft-Server: https://www.spigotmc.org/resources/noteblockapi.19287/
+  #If you followed the tutorial on the spigot site and got a YOURMUSIC.nbs file put this file in the music folder,
+  #which got created (if you've installed the NoteBlockAPI plugin and reloaded THIS plugin) in the same path
+  #as this config.yml (plugins/Nyctophobia/music). Now you're ready!
+  Music:
+    #To enable this feature change this to true! (You must have followed the instructions above to get this working)
+    Enabled: false
+    #Change this to true if you want to play (NBS)Music randomly (if you've added 1 or more musicfiles to the list below)
+    RandomMusic: false
+    #If the music is already started you can decide if it should restart true or false
+    RestartIfRunning: true
+    #Just add all .nbs you've added in the music folder (if you enabled RandomMusic, if not it will play the first song on the list below)
+    Files:
+      - YOURNBSMUSICFILENAME.nbs
+
   #Set the Commands, which you want to get sended
   #Add " - console" at the end if you want to send this command in the console!
   #There are also some placeholders: %player% = The playername, %uuid% = The UUID of the player
   Commands:
     - give %player% black_wool 1 - console
+
+#Set the actions when you get out of the darkness
+#IMPORTANT: This actions will be triggered if a player has left the darkness
+#Information: If you want to have more leave event features, write me on discord: TimeCode#0001
+LeaveEvents:
+
+  #Option for the MusicSystem (ONLY IF YOU HAVE INSTALLED NOTEBLOCKAPI)
+  Music:
+    #Stop music after leaving (if you disable this it will play the music till the end)
+    Stop: true
 
 #Set a cooldown if the action should only happen every few seconds!
 Cooldown:
@@ -96,14 +124,20 @@ Blacklist:
     - world_nether
     - world_the_end
 
-#Change the Permission of some Commands
+#Change the Permission of some Commands or the BYPASSPERMISSION
 Permission:
   #Command: /nyc help (If you don't have this permission, you also get a no permission message if you typed the wrong syntax)
   HelpCommand: nyctophobia.help
   #Command: /nyc reload
   ReloadCommand: nyctophobia.reload
+  #If you enable this and give a player this permission he won't get darknessevents
+  Bypass:
+    #Enable the Bypass Permission
+    Enabled: false
+    #Set the permission
+    Permission: nyctophobia.bypass
 
 #DO NOT CHANGE THIS!!!
 #If you change this, the config will reset itself
-config-version: 1.12
+config-version: 1.2
 

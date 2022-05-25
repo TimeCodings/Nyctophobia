@@ -1,5 +1,8 @@
 package dev.timecoding.nyctophobia.listener;
 
+import com.xxmicloxx.NoteBlockAPI.model.Song;
+import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
+import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder;
 import dev.timecoding.nyctophobia.Nyctophobia;
 import dev.timecoding.nyctophobia.event.DarknessEnterEvent;
 import dev.timecoding.nyctophobia.event.DarknessLeaveEvent;
@@ -19,10 +22,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.io.File;
+import java.util.*;
 
 public class MoveListener implements Listener {
 
@@ -45,6 +46,13 @@ public class MoveListener implements Listener {
         boolean blacklistenabled = config.getBoolean("Blacklist.Enabled");
         boolean intowhitelist = config.getBoolean("Blacklist.TurnIntoWhitelist");
         boolean chanceenabled = config.getBoolean("Chance.Enabled");
+        boolean musicenabled = config.getBoolean("Events.Music.Enabled");
+        boolean restartmusicifrunning = config.getBoolean("Events.Music.RestartIfRunning");
+        boolean randommusicenabled = config.getBoolean("Events.Music.RandomMusic");
+        boolean stopmusiconleave = config.getBoolean("LeaveEvents.Music.Stop");
+        boolean bypassenabled = config.getBoolean("Permission.Bypass.Enabled");
+
+        String bypassperm = config.getString("Permission.Bypass.Permission");
 
         if(chancenumber <= 0){
             chancenumber = 1;
@@ -55,6 +63,9 @@ public class MoveListener implements Listener {
 
 
         List<String> blacklist = config.getList("Blacklist.Worlds");
+        List<String> musicfiles = config.getList("Events.Music.Files");
+
+        HashMap<Player, RadioSongPlayer> mlist = Nyctophobia.plugin.songs;
 
         if(maxlighting >= 16){
             maxlighting = 0;
@@ -63,7 +74,7 @@ public class MoveListener implements Listener {
             maxblocklighting = 0;
         }
 
-        if(enabled) {
+        if(enabled && !bypassenabled || enabled && bypassenabled && !player.hasPermission(bypassperm)) {
             if(!blacklistenabled || blacklistenabled && !intowhitelist && !blacklist.contains(player.getWorld().getName()) || blacklistenabled && intowhitelist && blacklist.contains(player.getWorld().getName()))
             if(night && !plugin.isDay(player) || !night) {
                 //Get Lightlevels
@@ -111,6 +122,55 @@ public class MoveListener implements Listener {
                             List<String> potl = config.getList("Events.Potions");
                             List<String> soundl = config.getList("Events.Sounds");
                             List<String> cmdl = config.getList("Events.Commands");
+                            //NOTEBLOCKAPI: Play Music if enabled
+                            if(musicenabled && !randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
+                                File music = new File("plugins//Nyctophobia/music", musicfiles.get(0));
+                                if(restartmusicifrunning && mlist.containsKey(player)){
+                                    mlist.get(player).destroy();
+                                    mlist.remove(player);
+                                    Nyctophobia.plugin.songs = mlist;
+                                }
+                                if(music.exists() && !mlist.containsKey(player)) {
+                                    Song song = NBSDecoder.parse(music);
+                                    RadioSongPlayer rsp = new RadioSongPlayer(song);
+                                    rsp.addPlayer(player);
+                                    //Play song
+                                    rsp.setPlaying(true);
+
+                                    //Add player to list
+                                    mlist.put(player, rsp);
+                                }else{
+                                    Bukkit.getConsoleSender().sendMessage("§cCannot play "+musicfiles.get(0)+", because the file does not exists!");
+                                }
+                            }else if(musicenabled && randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
+                                List<RadioSongPlayer> rsps = new ArrayList<>();
+                                for(String ms : musicfiles){
+                                    File music = new File("plugins//Nyctophobia/music", ms);
+                                    if(music.exists() && !mlist.containsKey(player)) {
+                                        Song song = NBSDecoder.parse(music);
+                                        RadioSongPlayer rsp = new RadioSongPlayer(song);
+                                        rsps.add(rsp);
+                                    }else{
+                                        Bukkit.getConsoleSender().sendMessage("§cCannot play "+musicfiles.get(0)+", because the file does not exists!");
+                                    }
+                                }
+                                if(restartmusicifrunning && mlist.containsKey(player)){
+                                    mlist.get(player).destroy();
+                                    mlist.remove(player);
+                                    Nyctophobia.plugin.songs = mlist;
+                                }
+                                if(rsps.size() != 0 && !mlist.containsKey(player)){
+                                    Random r = new Random();
+                                    int rn = r.nextInt(rsps.size());
+                                    RadioSongPlayer finalrsp = rsps.get(rn);
+                                    finalrsp.addPlayer(player);
+                                    //Play song
+                                    finalrsp.setPlaying(true);
+
+                                    //Add player to list
+                                    mlist.put(player, finalrsp);
+                                }
+                            }
                             //Check and apply
                             Random r = new Random();
                             List<String> list = null;
@@ -247,10 +307,23 @@ public class MoveListener implements Listener {
                             }
                         }
                     }
+                    if(stopmusiconleave && mlist.containsKey(player)){
+                        mlist.get(player).destroy();
+                        mlist.remove(player);
+                        Nyctophobia.plugin.songs = mlist;
+                    }
                 }
             }
 
         }
+    }
+
+    public boolean musicFolderExists(){
+        File folder = new File("plugins//Nyctophobia//music");
+        if(folder.exists()){
+            return true;
+        }
+        return false;
     }
 
 

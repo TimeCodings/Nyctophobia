@@ -1,10 +1,12 @@
 name: Nyctophobia
-version: 1.12
+version: 1.2
 main: dev.timecoding.nyctophobia.Nyctophobia
 api-version: 1.18
 authors: [ TimeCoding ]
 description: Let the players feel fear!
 website: timecoding.de
+softdepend:
+  - NoteBlockAPI
 
 commands:
   nyc:

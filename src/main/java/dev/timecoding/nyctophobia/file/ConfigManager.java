@@ -46,12 +46,23 @@ public class ConfigManager {
         }else{
             Bukkit.getConsoleSender().sendMessage("§cNo Update found! Your currently running the newest version...");
         }
+        //If NoteblockAPI exists, create musicfolder
+        createMusicFolder();
     }
 
     public void reloadConfig(){
         this.cfg = YamlConfiguration.loadConfiguration(this.file);
         Bukkit.getConsoleSender().sendMessage("§aConfig reloaded!");
     }
+
+    public void createMusicFolder(){
+        File folder = new File("plugins//Nyctophobia//music");
+        if(!folder.exists() && Nyctophobia.plugin.nbapienabled){
+            folder.mkdir();
+            Bukkit.getConsoleSender().sendMessage("§aSucessfully created a new music folder!");
+        }
+    }
+
 
     private String resourceid = "102177";
     private String baseurl = "https://api.spigotmc.org/legacy/update.php?resource=";
@@ -92,11 +103,11 @@ public class ConfigManager {
                 remoteVersion = raw;
             }
             if (!aversion.equalsIgnoreCase(remoteVersion))
-                return true;
+                return false;
         } catch (IOException e) {
-            return false;
+            return true;
         }
-        return false;
+        return true;
     }
 
     private String pluginversion;

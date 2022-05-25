@@ -1,5 +1,6 @@
 package dev.timecoding.nyctophobia;
 
+import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import dev.timecoding.nyctophobia.api.Metrics;
 import dev.timecoding.nyctophobia.command.NycCommand;
 import dev.timecoding.nyctophobia.command.NycTabComplete;
@@ -15,13 +16,17 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public final class Nyctophobia extends JavaPlugin implements Listener {
 
     public static Nyctophobia plugin;
     public static ConfigManager config;
-    private ArrayList<Player> cooldown = new ArrayList<>();
     public boolean updateavailable = false;
+    public boolean nbapienabled = false;
+    private ArrayList<Player> cooldown = new ArrayList<>();
+
+    public HashMap<Player, RadioSongPlayer> songs = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -30,6 +35,14 @@ public final class Nyctophobia extends JavaPlugin implements Listener {
         //Register Instance
         plugin = this;
         config = new ConfigManager(plugin, "config");
+        //Check for NoteBlockAPI
+        Bukkit.getConsoleSender().sendMessage("§eSearching for §aNoteBlockAPI...");
+        if(getServer().getPluginManager().isPluginEnabled("NoteBlockAPI")){
+            nbapienabled = true;
+            Bukkit.getConsoleSender().sendMessage("§eNoteBlockAPI §awas found! Registering MusicModule...");
+        }else{
+            Bukkit.getConsoleSender().sendMessage("§eNoteBlockAPI §cwas not found! If you want to use custom NBS music please install NoteBlockAPI (§ehttps://www.spigotmc.org/resources/noteblockapi.19287/)");
+        }
         //Init Config
         config.init();
         //Register Listeners
@@ -46,9 +59,13 @@ public final class Nyctophobia extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onJoin(PlayerJoinEvent e){
+    public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if(p.isOp()){
+        if(songs.containsKey(p)){
+            songs.get(p).destroy();
+            songs.remove(p);
+        }
+        if (p.isOp() && updateavailable) {
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 2, 2);
             p.sendMessage("§fNyctophobia | §cA new update is available! To guarantee the best gaming experience, please download the new update from this link: §ehttps://www.spigotmc.org/resources/nyctophobia.102177/");
         }
