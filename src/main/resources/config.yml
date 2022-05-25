@@ -22,6 +22,14 @@ MaxBlockLighting: 1
 #Set to true if you want the action to only happen at night
 MustBeNightInWorld: false
 
+#Enable this feature if you want that the action occurs by chance
+Chance:
+  #Set to true if you want to enable this feature
+  Enabled: false
+  #Set the chance (Chance: 1/YOURCHANCE)
+  #(on this example chance: 1/10)
+  ChanceNumber: 10
+
 #Activate the function if you want the action to only happen when there are a certain number of monsters nearby!
 MonsterRequirement:
   #Enable the feature
@@ -95,7 +103,7 @@ Permission:
   #Command: /nyc reload
   ReloadCommand: nyctophobia.reload
 
-#DONT CHANGE THIS!!!
+#DO NOT CHANGE THIS!!!
 #If you change this, the config will reset itself
-config-version: 1.1
+config-version: 1.12
 

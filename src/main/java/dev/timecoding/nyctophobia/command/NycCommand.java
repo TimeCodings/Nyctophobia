@@ -25,9 +25,8 @@ public class NycCommand implements CommandExecutor {
             }else if(args[0].equalsIgnoreCase("reload") || args[0].equalsIgnoreCase("rl")){
                 if(sender.hasPermission(rlperm)){
                     sender.sendMessage("§aYou have successfully reloaded the config of the plugin!");
-                    //Save
-                    Nyctophobia.plugin.saveConfig();
-                    Nyctophobia.plugin.saveDefaultConfig();
+                    //Reload Config
+                    config.reloadConfig();
                 }else{
                     sender.sendMessage("§cYou don't have the permission to do this!");
                 }

@@ -8,12 +8,10 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +40,17 @@ public class ConfigManager {
         }
         //Checking for updates
         Nyctophobia.plugin.updateavailable = updateAvailable();
-        if (Nyctophobia.plugin.updateavailable) {
+        boolean b = Nyctophobia.plugin.updateavailable;
+        if (b) {
             Bukkit.getConsoleSender().sendMessage("§cA new update is available! To guarantee the best gaming experience, please download the new update from this link: §ehttps://www.spigotmc.org/resources/nyctophobia.102177/");
+        }else{
+            Bukkit.getConsoleSender().sendMessage("§cNo Update found! Your currently running the newest version...");
         }
+    }
+
+    public void reloadConfig(){
+        this.cfg = YamlConfiguration.loadConfiguration(this.file);
+        Bukkit.getConsoleSender().sendMessage("§aConfig reloaded!");
     }
 
     private String resourceid = "102177";
@@ -98,17 +104,46 @@ public class ConfigManager {
     public void configUpdate(File f) {
         if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(pluginversion)) && (this.getString("config-version") != null)) {
             Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
+            copyFile(file, getString("config-version"));
             f.delete();
             plugin.saveResource("config.yml", false);
             Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
         } else if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(pluginversion))) {
             Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
+            copyFile(file, getString("config-version"));
             f.delete();
             plugin.saveResource("config.yml", false);
             Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
         } else if ((f.exists()) && (this.getString("config-version").equalsIgnoreCase(pluginversion))) {
             Bukkit.getConsoleSender().sendMessage("§aConfig version matched, processing load... Success");
         }
+    }
+
+    public void copyFile(File oldfile, String version){
+        File folder = new File("plugins//Nyctophobia//backup");
+        if(!folder.exists()){
+            folder.mkdir();
+        }
+        File copied = new File("plugins//Nyctophobia//backup", "oldconfig_v"+version+".yml");
+        if(!copied.exists()) {
+            try (
+                    InputStream in = new BufferedInputStream(
+                            new FileInputStream(oldfile));
+                    OutputStream out = new BufferedOutputStream(
+                            new FileOutputStream(copied))) {
+                byte[] buffer = new byte[1024];
+                int lengthRead;
+                while ((lengthRead = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, lengthRead);
+                    out.flush();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Bukkit.getConsoleSender().sendMessage("§cBACKUP OF OLD CONFIG STORED IN §a"+ "plugins/Nyctophobia/backup/oldconfig_v"+version+".yml");
     }
 
 

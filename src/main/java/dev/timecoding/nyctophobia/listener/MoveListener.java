@@ -40,9 +40,19 @@ public class MoveListener implements Listener {
         boolean enabled = config.getBoolean("Enabled");
         int maxlighting = config.getInt("MaxLighting");
         int maxblocklighting = config.getInt("MaxBlockLighting");
+        int chancenumber = config.getInt("Chance.ChanceNumber");
         boolean night = config.getBoolean("MustBeNightInWorld");
         boolean blacklistenabled = config.getBoolean("Blacklist.Enabled");
         boolean intowhitelist = config.getBoolean("Blacklist.TurnIntoWhitelist");
+        boolean chanceenabled = config.getBoolean("Chance.Enabled");
+
+        if(chancenumber <= 0){
+            chancenumber = 1;
+        }
+
+        Random ran = new Random();
+        int ra = ran.nextInt((chancenumber+1));
+
 
         List<String> blacklist = config.getList("Blacklist.Worlds");
 
@@ -55,13 +65,14 @@ public class MoveListener implements Listener {
 
         if(enabled) {
             if(!blacklistenabled || blacklistenabled && !intowhitelist && !blacklist.contains(player.getWorld().getName()) || blacklistenabled && intowhitelist && blacklist.contains(player.getWorld().getName()))
-            if(night && !plugin.isDay(player) || !night){
+            if(night && !plugin.isDay(player) || !night) {
                 //Get Lightlevels
                 String lightlevel = String.valueOf(b.getLightLevel());
                 String skylightlevel = String.valueOf(b.getLightFromSky());
                 //Test
-                if(Integer.valueOf(lightlevel) <= maxlighting && Integer.valueOf(skylightlevel) <= maxblocklighting){
-                    if(!playerindarkness.contains(player)) {
+                if (Integer.valueOf(lightlevel) <= maxlighting && Integer.valueOf(skylightlevel) <= maxblocklighting) {
+                    if(!chanceenabled || chanceenabled && ra == (chancenumber-1)){
+                    if (!playerindarkness.contains(player)) {
                         //Call Events
                         DarknessEnterEvent darkevent = new DarknessEnterEvent(player);
                         Bukkit.getPluginManager().callEvent(darkevent);
@@ -70,15 +81,15 @@ public class MoveListener implements Listener {
                         int blocks = config.getInt("MonsterRequirement.RadiusInBlocks");
                         int monsters = config.getInt("MonsterRequirement.MinMonsters");
                         boolean monster = true;
-                        if(monsterr){
+                        if (monsterr) {
                             List<Entity> nearby = player.getNearbyEntities(blocks, 10, blocks);
                             int count = 0;
-                            for(Entity entity : nearby){
-                                if(entity instanceof Monster){
+                            for (Entity entity : nearby) {
+                                if (entity instanceof Monster) {
                                     count++;
                                 }
                             }
-                            if(count < monsters){
+                            if (count < monsters) {
                                 monster = false;
                             }
                         }
@@ -118,7 +129,7 @@ public class MoveListener implements Listener {
                             } else {
                                 boolean block = false;
                                 for (String st : list) {
-                                    if(!block) {
+                                    if (!block) {
                                         if (st.contains(" - ")) {
                                             ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
                                             player.sendTitle(split.get(0), split.get(1));
@@ -145,7 +156,7 @@ public class MoveListener implements Listener {
                                 int size = list.size();
                                 int random = r.nextInt(size);
                                 s = list.get(random);
-                                if(s.contains(" - ") && !s.startsWith(" - ")){
+                                if (s.contains(" - ") && !s.startsWith(" - ")) {
                                     ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
                                     int i;
                                     try {
@@ -153,15 +164,15 @@ public class MoveListener implements Listener {
                                     } catch (NumberFormatException en) {
                                         i = 999999999;
                                     }
-                                    if(i <= 999999999) {
+                                    if (i <= 999999999) {
                                         player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
                                     }
-                                }else{
+                                } else {
                                     player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), 999999999, 999999999));
                                 }
                             } else {
                                 for (String st : list) {
-                                    if(st.contains(" - ") && !st.startsWith(" - ")){
+                                    if (st.contains(" - ") && !st.startsWith(" - ")) {
                                         ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
                                         int i;
                                         try {
@@ -169,12 +180,13 @@ public class MoveListener implements Listener {
                                         } catch (NumberFormatException en) {
                                             i = 999999999;
                                         }
-                                        if(i <= 999999999) {
+                                        if (i <= 999999999) {
                                             player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
                                         }
-                                    }else{
+                                    } else {
                                         player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), 999999999, 999999999));
-                                    };
+                                    }
+                                    ;
                                 }
                             }
                             list = soundl;
@@ -195,7 +207,7 @@ public class MoveListener implements Listener {
                                 s = list.get(random);
                                 s = s.replace("%player%", player.getName()).replace("%uuid%", player.getUniqueId().toString());
                                 if (s.contains(" - console") || s.contains(" - CONSOLE")) {
-                                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s.replace(" - console","").replace(" - CONSOLE", ""));
+                                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s.replace(" - console", "").replace(" - CONSOLE", ""));
                                 } else {
                                     player.performCommand(s);
                                 }
@@ -203,34 +215,41 @@ public class MoveListener implements Listener {
                                 for (String st : list) {
                                     st = st.replace("%player%", player.getName()).replace("%uuid%", player.getUniqueId().toString());
                                     if (st.contains(" - console") || st.contains(" - CONSOLE")) {
-                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), st.replace(" - console","").replace(" - CONSOLE", ""));
+                                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), st.replace(" - console", "").replace(" - CONSOLE", ""));
                                     } else {
                                         player.performCommand(st);
                                     }
                                 }
                             }
+
                         }
                     }
-                }else if(playerindarkness.contains(player)){
+                    }else{
+                        if(!playerindarkness.contains(player)) {
+                            playerindarkness.add(player);
+                        }
+                    }
+                } else if (playerindarkness.contains(player)) {
                     //Trigger Event
                     DarknessLeaveEvent leave = new DarknessLeaveEvent(player);
                     Bukkit.getPluginManager().callEvent(leave);
-                    if(!leave.isCancelled()) {
+                    if (!leave.isCancelled()) {
                         //Remove from List
                         playerindarkness.remove(player);
                         //Remove all effects
                         List<String> potl = config.getList("Events.Potions");
                         for (String s : potl) {
-                            if(s.contains(" - ") && !s.startsWith(" - ")){
+                            if (s.contains(" - ") && !s.startsWith(" - ")) {
                                 ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
                                 player.removePotionEffect(PotionEffectType.getByName(split.get(0)));
-                            }else{
+                            } else {
                                 player.removePotionEffect(PotionEffectType.getByName(s));
                             }
                         }
                     }
                 }
             }
+
         }
     }
 
