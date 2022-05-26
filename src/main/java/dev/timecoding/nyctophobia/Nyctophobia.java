@@ -63,6 +63,8 @@ public final class Nyctophobia extends JavaPlugin implements Listener {
     }
 
     public void onDisable(){
+        //Disable
+        Bukkit.getConsoleSender().sendMessage("§eNytophobia §cgot disabled!");
         //If NoteBlockAPI enabled remove all songs
         if(nbapienabled){
             for(Player player : songs.keySet()){

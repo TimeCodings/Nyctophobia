@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.*;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -26,7 +27,6 @@ public class ConfigManager {
         this.file = new File("plugins//Nyctophobia", filename + ".yml");
         this.cfg = YamlConfiguration.loadConfiguration(this.file);
         cfg.options().copyDefaults(true);
-        pluginversion = plugin.getDescription().getVersion();
     }
 
     public void init() {
@@ -109,22 +109,22 @@ public class ConfigManager {
         return false;
     }
 
-    private String pluginversion;
+    private String configversion = "1.3";
 
     public void configUpdate(File f) {
-        if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(pluginversion)) && (this.getString("config-version") != null)) {
+        if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(configversion)) && (this.getString("config-version") != null)) {
             Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
             copyFile(file, getString("config-version"));
             f.delete();
             plugin.saveResource("config.yml", false);
             Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
-        } else if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(pluginversion))) {
+        } else if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(configversion))) {
             Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
             copyFile(file, getString("config-version"));
             f.delete();
             plugin.saveResource("config.yml", false);
             Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
-        } else if ((f.exists()) && (this.getString("config-version").equalsIgnoreCase(pluginversion))) {
+        } else if ((f.exists()) && (this.getString("config-version").equalsIgnoreCase(configversion))) {
             Bukkit.getConsoleSender().sendMessage("§aConfig version matched, processing load... Success");
         }
     }

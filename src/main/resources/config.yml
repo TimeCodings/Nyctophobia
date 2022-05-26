@@ -103,6 +103,40 @@ Events:
 #Information: If you want to have more leave event features, write me on discord: TimeCode#0001
 LeaveEvents:
 
+  #IMPORTANT: This are the same features as in the Events function, but THIS events will get triggered if you leave
+  #the darkness
+
+  #Activate this if you want to send a random title from the titles below
+  RandomTitle: false
+  #Activate this if you want to send a random message to the player from the messages below
+  RandomMessage: false
+  #Activate this if you want to apply a random potions from the potions below
+  RandomPotion: false
+  #Activate this if you want to play a random sound from the sounds below
+  RandomSound: false
+  #Activate this if you want to send a random command from the commands below
+  RandomCommand: false
+
+  #Set the titles, which you want to get displayed
+  #Add " - " (with the subtitle behind it) if you want to add a subtitle!
+  Titles:
+    - '&e&lFINALLY! - &eI am out of the darkness!'
+
+  #Set the messages, which you want to get sended
+  Messages:
+    - '&eFinally I am out here!'
+
+  #Set the potions, which you want to get applied
+  #Add " - AMOUNTOFAMPLIFIER" at the end of the potions to set the amount of amplifier (Default: 99999999/Unlimited)
+  #All Minecraft-PotionEffectTypes can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/potion/PotionEffectType.html
+  Potions:
+    - HEAL - 1
+
+  #Set the sounds, which you want to get played
+  #All Minecraft-Sounds can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+  Sounds:
+    - ENTITY_PLAYER_LEVELUP
+
   #Option for the MusicSystem (ONLY IF YOU HAVE INSTALLED NOTEBLOCKAPI)
   Music:
     #Stop music after leaving (if you disable this it will play the music till the end)
@@ -139,5 +173,5 @@ Permission:
 
 #DO NOT CHANGE THIS!!!
 #If you change this, the config will reset itself
-config-version: 1.2
+config-version: 1.3
 

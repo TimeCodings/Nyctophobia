@@ -297,13 +297,136 @@ public class MoveListener implements Listener {
                         //Remove from List
                         playerindarkness.remove(player);
                         //Remove all effects
-                        List<String> potl = config.getList("Events.Potions");
-                        for (String s : potl) {
+                        List<String> potll = config.getList("Events.Potions");
+                        for (String s : potll) {
                             if (s.contains(" - ") && !s.startsWith(" - ")) {
                                 ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
                                 player.removePotionEffect(PotionEffectType.getByName(split.get(0)));
                             } else {
                                 player.removePotionEffect(PotionEffectType.getByName(s));
+                            }
+                        }
+                        //Trigger actions from config (Same as the EnterEvent)
+                        //Random Functions
+                        boolean rtitle = config.getBoolean("LeaveEvents.RandomTitle");
+                        boolean rmsg = config.getBoolean("LeaveEvents.RandomMessage");
+                        boolean rpotion = config.getBoolean("LeaveEvents.RandomPotion");
+                        boolean rsound = config.getBoolean("LeaveEvents.RandomSound");
+                        boolean rcmd = config.getBoolean("LeaveEvents.RandomCommand");
+                        //Listes
+                        List<String> titlel = config.getList("LeaveEvents.Titles");
+                        List<String> msgl = config.getList("LeaveEvents.Messages");
+                        List<String> potl = config.getList("LeaveEvents.Potions");
+                        List<String> soundl = config.getList("LeaveEvents.Sounds");
+                        List<String> cmdl = config.getList("LeaveEvents.Commands");
+                        //Check and apply
+                        Random r = new Random();
+                        List<String> list = null;
+                        String s;
+                        list = titlel;
+                        if (rtitle) {
+                            int size = list.size();
+                            int random = r.nextInt(size);
+                            s = list.get(random);
+                            if (s.contains(" - ")) {
+                                ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
+                                player.sendTitle(split.get(0), split.get(1));
+                            } else {
+                                player.sendTitle(s, "");
+                            }
+                        } else {
+                            boolean block = false;
+                            for (String st : list) {
+                                if (!block) {
+                                    if (st.contains(" - ")) {
+                                        ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
+                                        player.sendTitle(split.get(0), split.get(1));
+                                    } else {
+                                        player.sendTitle(st, "");
+                                    }
+                                    block = true;
+                                }
+                            }
+                        }
+                        list = msgl;
+                        if (rmsg) {
+                            int size = list.size();
+                            int random = r.nextInt(size);
+                            s = list.get(random);
+                            player.sendMessage(s);
+                        } else {
+                            for (String st : list) {
+                                player.sendMessage(st);
+                            }
+                        }
+                        list = potl;
+                        if (rpotion) {
+                            int size = list.size();
+                            int random = r.nextInt(size);
+                            s = list.get(random);
+                            if (s.contains(" - ") && !s.startsWith(" - ")) {
+                                ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
+                                int i;
+                                try {
+                                    i = Integer.parseInt(split.get(1));
+                                } catch (NumberFormatException en) {
+                                    i = 999999999;
+                                }
+                                if (i <= 999999999) {
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                }
+                            } else {
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), 999999999, 999999999));
+                            }
+                        } else {
+                            for (String st : list) {
+                                if (st.contains(" - ") && !st.startsWith(" - ")) {
+                                    ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
+                                    int i;
+                                    try {
+                                        i = Integer.parseInt(split.get(1));
+                                    } catch (NumberFormatException en) {
+                                        i = 999999999;
+                                    }
+                                    if (i <= 999999999) {
+                                        player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                    }
+                                } else {
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), 999999999, 999999999));
+                                }
+                                ;
+                            }
+                        }
+                        list = soundl;
+                        if (rsound) {
+                            int size = list.size();
+                            int random = r.nextInt(size);
+                            s = list.get(random);
+                            player.playSound(player.getLocation(), Sound.valueOf(s), 2, 2);
+                        } else {
+                            for (String st : list) {
+                                player.playSound(player.getLocation(), Sound.valueOf(st), 2, 2);
+                            }
+                        }
+                        list = cmdl;
+                        if (rcmd) {
+                            int size = list.size();
+                            int random = r.nextInt(size);
+                            s = list.get(random);
+                            s = s.replace("%player%", player.getName()).replace("%uuid%", player.getUniqueId().toString());
+                            if (s.contains(" - console") || s.contains(" - CONSOLE")) {
+                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), s.replace(" - console", "").replace(" - CONSOLE", ""));
+                            } else {
+                                player.performCommand(s);
+                            }
+                        } else {
+                            for (String st : list) {
+                                st = st.replace("%player%", player.getName()).replace("%uuid%", player.getUniqueId().toString());
+                                if (st.contains(" - console") || st.contains(" - CONSOLE")) {
+                                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), st.replace(" - console", "").replace(" - CONSOLE", ""));
+                                } else {
+                                    player.performCommand(st);
+                                }
                             }
                         }
                     }
