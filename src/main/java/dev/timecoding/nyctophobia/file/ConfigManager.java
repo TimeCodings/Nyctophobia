@@ -63,7 +63,6 @@ public class ConfigManager {
         }
     }
 
-
     private String resourceid = "102177";
     private String baseurl = "https://api.spigotmc.org/legacy/update.php?resource=";
 
@@ -103,11 +102,11 @@ public class ConfigManager {
                 remoteVersion = raw;
             }
             if (!aversion.equalsIgnoreCase(remoteVersion))
-                return false;
+                return true;
         } catch (IOException e) {
-            return true;
+            return false;
         }
-        return true;
+        return false;
     }
 
     private String pluginversion;

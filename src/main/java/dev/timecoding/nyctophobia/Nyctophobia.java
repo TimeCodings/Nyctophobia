@@ -4,6 +4,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer;
 import dev.timecoding.nyctophobia.api.Metrics;
 import dev.timecoding.nyctophobia.command.NycCommand;
 import dev.timecoding.nyctophobia.command.NycTabComplete;
+import dev.timecoding.nyctophobia.event.DarknessLeaveEvent;
 import dev.timecoding.nyctophobia.file.ConfigManager;
 import dev.timecoding.nyctophobia.listener.MoveListener;
 import org.bukkit.Bukkit;
@@ -14,9 +15,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public final class Nyctophobia extends JavaPlugin implements Listener {
 
@@ -55,6 +59,17 @@ public final class Nyctophobia extends JavaPlugin implements Listener {
         if(config.getBoolean("bStats")){
             int pluginId = 15276;
             Metrics metrics = new Metrics(this, pluginId);
+        }
+    }
+
+    public void onDisable(){
+        //If NoteBlockAPI enabled remove all songs
+        if(nbapienabled){
+            for(Player player : songs.keySet()){
+                RadioSongPlayer rsp = songs.get(player);
+                rsp.destroy();
+            }
+            songs.clear();
         }
     }
 
