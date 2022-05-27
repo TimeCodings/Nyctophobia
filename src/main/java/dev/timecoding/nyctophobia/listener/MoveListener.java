@@ -8,6 +8,7 @@ import dev.timecoding.nyctophobia.event.DarknessEnterEvent;
 import dev.timecoding.nyctophobia.event.DarknessLeaveEvent;
 import dev.timecoding.nyctophobia.file.ConfigManager;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -27,7 +28,7 @@ import java.util.*;
 
 public class MoveListener implements Listener {
 
-    private ConfigManager config = Nyctophobia.config;
+    private ConfigManager config = Nyctophobia.plugin.getPluginConfig();
     private Nyctophobia plugin = Nyctophobia.plugin;
     private List<Player> playerindarkness = new ArrayList<>();
 
@@ -106,10 +107,42 @@ public class MoveListener implements Listener {
                         }
                         //Actions
                         if (!darkevent.isCancelled() && !plugin.cooldownEnabled(player) && monster) {
+                            //Remove all effects
+                            List<String> potll = config.getList("LeaveEvents.Potions");
+                            for (String s : potll) {
+                                if(!s.contains(" _ ") && !s.contains(" - ")){
+                                    player.removePotionEffect(PotionEffectType.getByName(s));
+                                }
+                                if(s.contains(" _ ") && !s.startsWith(" _ ") && !s.contains(" - ")){
+                                    ArrayList<String> split2 = new ArrayList<String>(Arrays.asList(s.split(" _ ")));
+                                    int i = 0;
+                                    for(String s2 : split2){
+                                        if(i == 1){
+                                            player.removePotionEffect(PotionEffectType.getByName(s.replace(" _ "+s2, "")));
+                                        }else{
+                                            i++;
+                                        }
+                                    }
+                                }
+                                if (s.contains(" - ") && !s.startsWith(" - ")) {
+                                    ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
+                                    if(s.contains(" _ ") && !s.startsWith(" _ ")){
+                                            ArrayList<String> split2 = new ArrayList<String>(Arrays.asList(s.split(" _ ")));
+                                            int i = 0;
+                                            for(String s2 : split2){
+                                                if(i == 1){
+                                                    player.removePotionEffect(PotionEffectType.getByName(split.get(0).replace(" _ "+s2, "")));
+                                                }else{
+                                                    i++;
+                                                }
+                                        }
+                                    }else{
+                                        player.removePotionEffect(PotionEffectType.getByName(split.get(0)));
+                                    }
+                                }
+                            }
                             //Add To List
                             playerindarkness.add(player);
-                            //Start Cooldown, if activated
-                            plugin.activateCooldown(player);
                             //Random Functions
                             boolean rtitle = config.getBoolean("Events.RandomTitle");
                             boolean rmsg = config.getBoolean("Events.RandomMessage");
@@ -140,7 +173,7 @@ public class MoveListener implements Listener {
                                     //Add player to list
                                     mlist.put(player, rsp);
                                 }else{
-                                    Bukkit.getConsoleSender().sendMessage("§cCannot play "+musicfiles.get(0)+", because the file does not exists!");
+                                    Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Cannot play "+musicfiles.get(0)+", because the file does not exists!");
                                 }
                             }else if(musicenabled && randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
                                 List<RadioSongPlayer> rsps = new ArrayList<>();
@@ -151,7 +184,7 @@ public class MoveListener implements Listener {
                                         RadioSongPlayer rsp = new RadioSongPlayer(song);
                                         rsps.add(rsp);
                                     }else{
-                                        Bukkit.getConsoleSender().sendMessage("§cCannot play "+musicfiles.get(0)+", because the file does not exists!");
+                                        Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Cannot play "+musicfiles.get(0)+", because the file does not exists!");
                                     }
                                 }
                                 if(restartmusicifrunning && mlist.containsKey(player)){
@@ -294,6 +327,8 @@ public class MoveListener implements Listener {
                     DarknessLeaveEvent leave = new DarknessLeaveEvent(player);
                     Bukkit.getPluginManager().callEvent(leave);
                     if (!leave.isCancelled()) {
+                        //Start Cooldown, if activated
+                        plugin.enableCooldown(player);
                         //Remove from List
                         playerindarkness.remove(player);
                         //Remove all effects
@@ -322,7 +357,7 @@ public class MoveListener implements Listener {
                         //Check and apply
                         Random r = new Random();
                         List<String> list = null;
-                        String s;
+                        String s = null;
                         list = titlel;
                         if (rtitle) {
                             int size = list.size();
@@ -361,40 +396,84 @@ public class MoveListener implements Listener {
                         }
                         list = potl;
                         if (rpotion) {
-                            int size = list.size();
-                            int random = r.nextInt(size);
-                            s = list.get(random);
+                            int time = 999999999;
+                            boolean c = false;
+                            String replace = "";
+                            if(s.contains(" _ ") && !s.startsWith(" _ ")){
+                                c = true;
+                                ArrayList<String> split2 = new ArrayList<String>(Arrays.asList(s.split(" _ ")));
+                                int i = 0;
+                                for(String s2 : split2){
+                                    if(i == 1){
+                                        replace = s2;
+                                        time = Integer.valueOf(s2)*20;
+                                    }else{
+                                        i++;
+                                    }
+                                }
+                            }
+
                             if (s.contains(" - ") && !s.startsWith(" - ")) {
                                 ArrayList<String> split = new ArrayList<String>(Arrays.asList(s.split(" - ")));
                                 int i;
                                 try {
-                                    i = Integer.parseInt(split.get(1));
+                                    if(c){
+                                        i = Integer.parseInt(split.get(1).replace(" _ "+replace, ""));
+                                    }else{
+                                        i = Integer.parseInt(split.get(1));
+                                    }
                                 } catch (NumberFormatException en) {
                                     i = 999999999;
                                 }
                                 if (i <= 999999999) {
-                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), time, i));
                                 }
                             } else {
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), 999999999, 999999999));
+                                if(c){
+                                    s = s.replace(" _ "+replace, "");
+                                }
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(s), time, 999999999));
                             }
                         } else {
                             for (String st : list) {
+                                int time = 999999999;
+                                boolean c = false;
+                                String replace = "";
+                                if(st.contains(" _ ") && !st.startsWith(" _ ")){
+                                    c = true;
+                                    ArrayList<String> split2 = new ArrayList<String>(Arrays.asList(st.split(" _ ")));
+                                    int i = 0;
+                                    for(String s2 : split2){
+                                        if(i == 1){
+                                            replace = s2;
+                                            time = Integer.valueOf(s2)*20;
+                                        }else{
+                                            i++;
+                                        }
+                                    }
+                                }
+
                                 if (st.contains(" - ") && !st.startsWith(" - ")) {
                                     ArrayList<String> split = new ArrayList<String>(Arrays.asList(st.split(" - ")));
                                     int i;
                                     try {
-                                        i = Integer.parseInt(split.get(1));
+                                        if(c){
+                                            i = Integer.parseInt(split.get(1).replace(" _ "+replace, ""));
+                                        }else{
+                                            i = Integer.parseInt(split.get(1));
+                                        }
                                     } catch (NumberFormatException en) {
                                         i = 999999999;
                                     }
                                     if (i <= 999999999) {
-                                        player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), 999999999, i));
+                                        player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(split.get(0)), time, i));
                                     }
                                 } else {
-                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), 999999999, 999999999));
+                                    if(c){
+                                        st = st.replace(" _ "+replace, "");
+                                    }
+                                    player.addPotionEffect(new PotionEffect(PotionEffectType.getByName(st), time, 999999999));
                                 }
-                                ;
                             }
                         }
                         list = soundl;

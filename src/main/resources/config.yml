@@ -128,9 +128,11 @@ LeaveEvents:
 
   #Set the potions, which you want to get applied
   #Add " - AMOUNTOFAMPLIFIER" at the end of the potions to set the amount of amplifier (Default: 99999999/Unlimited)
+  #Add " _ TIMEINSECONDS" to set the time of the potion (Default: 9999999/Unlimited)
   #All Minecraft-PotionEffectTypes can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/potion/PotionEffectType.html
   Potions:
-    - HEAL - 1
+    - HEAL - 1 _ 10
+    - GLOWING _ 5
 
   #Set the sounds, which you want to get played
   #All Minecraft-Sounds can you find here: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
@@ -171,7 +173,10 @@ Permission:
     #Set the permission
     Permission: nyctophobia.bypass
 
+#Enable or Disable the Auto Updater
+AutoUpdater: true
+
 #DO NOT CHANGE THIS!!!
 #If you change this, the config will reset itself
-config-version: 1.3
+config-version: 1.3.1
 

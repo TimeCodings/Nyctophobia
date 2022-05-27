@@ -2,6 +2,7 @@ package dev.timecoding.nyctophobia.file;
 
 import dev.timecoding.nyctophobia.Nyctophobia;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,147 +16,57 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ConfigManager {
 
     private Plugin plugin;
     private File file;
-    public YamlConfiguration cfg;
+    private YamlConfiguration cfg;
 
     public ConfigManager(Plugin plugin, String filename) {
         this.plugin = plugin;
         this.file = new File("plugins//Nyctophobia", filename + ".yml");
         this.cfg = YamlConfiguration.loadConfiguration(this.file);
-        cfg.options().copyDefaults(true);
     }
 
     public void init() {
-        if (file.exists()) {
-            //ConfigUpdate
-            configUpdate(file);
-        } else {
-            //Load Default
-            plugin.saveResource("config.yml", false);
-            Bukkit.getConsoleSender().sendMessage("No config found! Creating a new config...");
-        }
-        //Checking for updates
-        Nyctophobia.plugin.updateavailable = updateAvailable();
-        boolean b = Nyctophobia.plugin.updateavailable;
-        if (b) {
-            Bukkit.getConsoleSender().sendMessage("§cA new update is available! To guarantee the best gaming experience, please download the new update from this link: §ehttps://www.spigotmc.org/resources/nyctophobia.102177/");
-        }else{
-            Bukkit.getConsoleSender().sendMessage("§cNo Update found! Your currently running the newest version...");
-        }
         //If NoteblockAPI exists, create musicfolder
         createMusicFolder();
+        //Delete Old Backup Folder
+        deleteOldBackupFolder();
+    }
+
+    public void deleteOldBackupFolder(){
+        File folder = new File("plugins//Nyctophobia//backup");
+        if(folder.exists()){
+            //Clean directory
+            for(File f : folder.listFiles()){
+                if(!f.isDirectory()){
+                    f.delete();
+                }
+            }
+            //Delete Directory
+            try {
+                Files.delete(folder.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Sucessfully deleted the old backup folder (AUTOUPDATER v1.3.2 UPDATE)!");
+        }
     }
 
     public void reloadConfig(){
         this.cfg = YamlConfiguration.loadConfiguration(this.file);
-        Bukkit.getConsoleSender().sendMessage("§aConfig reloaded!");
     }
 
     public void createMusicFolder(){
         File folder = new File("plugins//Nyctophobia//music");
         if(!folder.exists() && Nyctophobia.plugin.nbapienabled){
             folder.mkdir();
-            Bukkit.getConsoleSender().sendMessage("§aSucessfully created a new music folder!");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN+"Sucessfully created a new music folder!");
         }
     }
-
-    private String resourceid = "102177";
-    private String baseurl = "https://api.spigotmc.org/legacy/update.php?resource=";
-
-    public String getUpdateVersion() {
-        String aversion = plugin.getDescription().getVersion();
-        HttpsURLConnection connection = null;
-        try {
-            connection = (HttpsURLConnection) new URL(baseurl + resourceid).openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            connection.setRequestMethod("GET");
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-        String raw = null;
-        try {
-            raw = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return raw;
-    }
-
-    public boolean updateAvailable() {
-        Bukkit.getConsoleSender().sendMessage("Checking for updates...");
-        try {
-            String aversion = plugin.getDescription().getVersion();
-            HttpsURLConnection connection = (HttpsURLConnection) new URL(baseurl + resourceid).openConnection();
-            connection.setRequestMethod("GET");
-            String raw = new BufferedReader(new InputStreamReader(connection.getInputStream())).readLine();
-            String remoteVersion;
-            if (raw.contains("-")) {
-                remoteVersion = raw.split("-")[0].trim();
-            } else {
-                remoteVersion = raw;
-            }
-            if (!aversion.equalsIgnoreCase(remoteVersion))
-                return true;
-        } catch (IOException e) {
-            return false;
-        }
-        return false;
-    }
-
-    private String configversion = "1.3";
-
-    public void configUpdate(File f) {
-        if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(configversion)) && (this.getString("config-version") != null)) {
-            Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
-            copyFile(file, getString("config-version"));
-            f.delete();
-            plugin.saveResource("config.yml", false);
-            Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
-        } else if ((f.exists()) && (!this.getString("config-version").equalsIgnoreCase(configversion))) {
-            Bukkit.getConsoleSender().sendMessage("§cConfig version doesn't match, deleting and recreating...");
-            copyFile(file, getString("config-version"));
-            f.delete();
-            plugin.saveResource("config.yml", false);
-            Bukkit.getConsoleSender().sendMessage("§aSuccessfully deleted and recreated the config.");
-        } else if ((f.exists()) && (this.getString("config-version").equalsIgnoreCase(configversion))) {
-            Bukkit.getConsoleSender().sendMessage("§aConfig version matched, processing load... Success");
-        }
-    }
-
-    public void copyFile(File oldfile, String version){
-        File folder = new File("plugins//Nyctophobia//backup");
-        if(!folder.exists()){
-            folder.mkdir();
-        }
-        File copied = new File("plugins//Nyctophobia//backup", "oldconfig_v"+version+".yml");
-        if(!copied.exists()) {
-            try (
-                    InputStream in = new BufferedInputStream(
-                            new FileInputStream(oldfile));
-                    OutputStream out = new BufferedOutputStream(
-                            new FileOutputStream(copied))) {
-                byte[] buffer = new byte[1024];
-                int lengthRead;
-                while ((lengthRead = in.read(buffer)) > 0) {
-                    out.write(buffer, 0, lengthRead);
-                    out.flush();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        Bukkit.getConsoleSender().sendMessage("§cBACKUP OF OLD CONFIG STORED IN §a"+ "plugins/Nyctophobia/backup/oldconfig_v"+version+".yml");
-    }
-
 
     public void save() {
         try {
@@ -180,12 +91,21 @@ public class ConfigManager {
         save();
     }
 
+    public void copyDefaults(boolean b){
+        cfg.options().copyDefaults(b);
+    }
+
     public void addDefaultList(String key, String previewvalue) {
         List<String> list = new ArrayList<>();
         //Add Preview
         list.add(previewvalue);
         //Add + Save
         cfg.addDefault(key, list);
+        save();
+    }
+
+    public void set(String key, Object object){
+        cfg.set(key, object);
         save();
     }
 
@@ -196,7 +116,11 @@ public class ConfigManager {
         return "NO VALUE";
     }
 
-    private boolean keyExists(String key) {
+    public Map<String, Object> getValues(boolean deep) {
+        return cfg.getValues(deep);
+    }
+
+    public boolean keyExists(String key) {
         if (cfg.get(key) != null) {
             return true;
         }
@@ -213,6 +137,8 @@ public class ConfigManager {
     public Boolean getBoolean(String key) {
         if (keyExists(key)) {
             return cfg.getBoolean(key);
+        }else if(key.equalsIgnoreCase("AutoUpdater")){
+            return true;
         }
         return false;
     }

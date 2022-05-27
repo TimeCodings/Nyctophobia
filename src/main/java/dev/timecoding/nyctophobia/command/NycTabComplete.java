@@ -12,7 +12,8 @@ import java.util.List;
 
 public class NycTabComplete implements TabCompleter {
 
-    ConfigManager config = Nyctophobia.config;
+    //Get ConfigManager instance
+    private ConfigManager config = Nyctophobia.plugin.getPluginConfig();
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
