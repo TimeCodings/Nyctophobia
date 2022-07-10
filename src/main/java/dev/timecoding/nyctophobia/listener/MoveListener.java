@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -156,7 +157,7 @@ public class MoveListener implements Listener {
                             List<String> soundl = config.getList("Events.Sounds");
                             List<String> cmdl = config.getList("Events.Commands");
                             //NOTEBLOCKAPI: Play Music if enabled
-                            if(musicenabled && !randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
+                            if(Nyctophobia.plugin.nbapienabled && musicenabled && !randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
                                 File music = new File("plugins//Nyctophobia/music", musicfiles.get(0));
                                 if(restartmusicifrunning && mlist.containsKey(player)){
                                     mlist.get(player).destroy();
@@ -175,7 +176,7 @@ public class MoveListener implements Listener {
                                 }else{
                                     Bukkit.getConsoleSender().sendMessage(ChatColor.RED+"Cannot play "+musicfiles.get(0)+", because the file does not exists!");
                                 }
-                            }else if(musicenabled && randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
+                            }else if(Nyctophobia.plugin.nbapienabled && musicenabled && randommusicenabled && musicfiles.size() != 0 && musicFolderExists()){
                                 List<RadioSongPlayer> rsps = new ArrayList<>();
                                 for(String ms : musicfiles){
                                     File music = new File("plugins//Nyctophobia/music", ms);

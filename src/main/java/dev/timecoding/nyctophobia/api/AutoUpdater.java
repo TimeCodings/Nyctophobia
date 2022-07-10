@@ -21,9 +21,10 @@ public class AutoUpdater {
     private String pluginversion;
     private String configversion;
     private boolean autoupdaterenabled;
+    private boolean sent = false;
 
     //CHANGE THIS EVERY VERSION EVERY CONFIGUPDATE
-    private String newconfigversion = "1.3.1";
+    private String newconfigversion = "1.3.2";
 
 
     public AutoUpdater(Nyctophobia plugin){
@@ -34,13 +35,25 @@ public class AutoUpdater {
     }
 
     public String getNewestPluginVersion() throws IOException {
+        StringBuilder result = new StringBuilder();
         URL url = new URL(apibaseurl+"plugin");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Accept-Charset", "UTF-8");
         connection.setRequestMethod("GET");
         connection.connect();
-        try(InputStream inputStream = connection.getInputStream(); Scanner scanner = new Scanner(inputStream)){
-            return scanner.next();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream()))) {
+            for (String line; (line = reader.readLine()) != null; ) {
+                result.append(line);
+            }
+        }catch (IOException e){
+            result = new StringBuilder(pluginversion);
+            if(!sent) {
+                sent = true;
+                Bukkit.getConsoleSender().sendMessage("§cThe AutoUpdater might not work because you're using an outdated minecraft-version! §cTo see new updates visit our spigot-site: §ehttps://www.spigotmc.org/resources/nyctophobia.102177/");
+            }
         }
+        return result.toString();
     }
 
     public boolean pluginUpdateAvailable(){

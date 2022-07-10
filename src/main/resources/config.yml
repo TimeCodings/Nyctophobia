@@ -39,6 +39,8 @@ MonsterRequirement:
   #Set the radius of blocks in which a certain number of monsters must be spawned
   RadiusInBlocks: 10
 
+#IMPORTANT: If you're using an outdated version of minecraft, you need to change the sounds, potions etc. to the outdated sound-names!
+
 #Set the actions to take place when you fall into the darkness (There's also the DarknessEnterEvent for this if you're using the API)
 #IMPORTANT: This actions will be triggered if a player has entered the darkness
 Events:
@@ -97,6 +99,8 @@ Events:
   #There are also some placeholders: %player% = The playername, %uuid% = The UUID of the player
   Commands:
     - give %player% black_wool 1 - console
+
+#IMPORTANT: If you're using an outdated version of minecraft, you need to change the sounds, potions etc. to the outdated sound-names!
 
 #Set the actions when you get out of the darkness
 #IMPORTANT: This actions will be triggered if a player has left the darkness
