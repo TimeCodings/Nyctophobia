@@ -182,5 +182,5 @@ AutoUpdater: true
 
 #DO NOT CHANGE THIS!!!
 #If you change this, the config will reset itself
-config-version: 1.3.1
+config-version: 1.3.2
 
