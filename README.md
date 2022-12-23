@@ -2,6 +2,8 @@
 
 ***Nyctophobia is a plugin which I made for fun! If you want to have new features please open a conversation or join my Discord:*** https://discord.gg/8QWmU4ebCC
 
+***Spigot-Page:*** https://www.spigotmc.org/resources/nyctophobia.102177/
+
 **Whats Nyctophobia?**
 With Nyctophobia you can scare players with e.g. effects, messages, etc. when they're is in the dark! The plugin is 99% adjustable and offers many small features that can be activated and configured in the config! It also offers a small API for developers.
 
